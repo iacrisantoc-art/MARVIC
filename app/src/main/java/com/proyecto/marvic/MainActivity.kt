@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Inicializar datos de prueba (materiales, movimientos, etc.)
-                FirestoreInitializer.initializeIfEmpty(forceReload = false)
+                FirestoreInitializer.initializeIfEmpty(forceReload = true)
                 
                 // Inicializar roles si no existen
                 FirestoreRoleRepository().initializeDefaultRoles()
