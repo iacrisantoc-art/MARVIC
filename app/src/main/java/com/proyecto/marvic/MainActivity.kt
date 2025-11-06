@@ -84,17 +84,16 @@ class MainActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Inicializar datos de prueba (materiales, movimientos, etc.)
-                FirestoreInitializer.initializeIfEmpty(forceReload = true)
+                FirestoreInitializer.initializeIfEmpty(forceReload = false)
                 
                 // Inicializar roles si no existen
                 FirestoreRoleRepository().initializeDefaultRoles()
                 
-                // Inicializar usuarios de prueba si no existen
-                UserInitializer.initializeDefaultUsers()
-                
-                println("✅ Inicialización automática completada")
+                println("✅ Inicialización automática completada - Todas las colecciones verificadas")
+                println("📊 Verifica en Firebase Console: users, providers, projects, movements, transfers")
             } catch (e: Exception) {
                 println("❌ Error en inicialización: ${e.message}")
+                e.printStackTrace()
             }
         }
         
@@ -124,7 +123,9 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     onGoToMovement = { navController.navigate(Routes.Movement.route) },
                     onGoToSearch = { navController.navigate(Routes.AdvancedSearch.route) },
                     onGoToReports = { navController.navigate(Routes.Reports.route) },
-                    onGoToSmartDashboard = { navController.navigate(Routes.SmartDashboard.route) }
+                    onGoToSmartDashboard = { navController.navigate(Routes.SmartDashboard.route) },
+                    onGoToProfile = { navController.navigate(Routes.Profile.route) },
+                    onGoToAnalytics = { navController.navigate(Routes.Analytics.route) }
                 )
             }
             composable(Routes.SmartDashboard.route) {
@@ -138,7 +139,8 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     onGoToProjects = { navController.navigate(Routes.Projects.route) },
                     onGoToTransfers = { navController.navigate(Routes.Transfers.route) },
                     onGoToAnalytics = { navController.navigate(Routes.Analytics.route) },
-                    onGoToProfile = { navController.navigate(Routes.Profile.route) }
+                    onGoToProfile = { navController.navigate(Routes.Profile.route) },
+                    onBack = { navController.navigate(Routes.Dashboard.route) }
                 )
             }
         composable(Routes.Movement.route) {
