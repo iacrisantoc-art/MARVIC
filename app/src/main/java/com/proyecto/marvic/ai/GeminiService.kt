@@ -46,7 +46,7 @@ data class GeminiError(
 
 object GeminiService {
     private const val API_KEY = "AIzaSyC0ew0UaA5fZ6rhVtIVGQuqHhQItiUFFJk"
-    private const val API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$API_KEY"
+    private const val API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=$API_KEY"
     
     suspend fun chat(prompt: String, context: String = ""): Result<String> {
         return try {
@@ -179,4 +179,3 @@ object GeminiService {
         }
     }
 }
-
