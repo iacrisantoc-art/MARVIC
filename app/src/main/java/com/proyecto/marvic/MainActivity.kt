@@ -82,21 +82,8 @@ class MainActivity : ComponentActivity() {
         // Datos iniciales en segundo plano
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // IMPORTANTE: Inicializar usuarios PRIMERO con UserInitializer (usa IDs específicos)
-                // Esto evita conflictos con FirestoreInitializer.loadSampleUsers()
-                UserInitializer.initializeDefaultUsers()
-                
-                // Inicializar TODAS las colecciones (cada una verifica si está vacía)
-                // CAMBIAR A forceReload = true PARA FORZAR REINICIALIZACIÓN (solo durante desarrollo)
-                // En producción mantener forceReload = false
-                // IMPORTANTE: Cambiar a true SOLO si quieres forzar reinicialización completa
-                // Esto sobrescribirá todos los datos existentes
-                val forceReload = false // ⚠️ Cambiar a true para forzar reinicialización completa
-                
-                // Inicializar todas las colecciones (cada una verifica si está vacía independientemente)
-                println("🔄 Iniciando inicialización de colecciones...")
-                FirestoreInitializer.initializeIfEmpty(forceReload = forceReload)
-                println("✅ FirestoreInitializer completado")
+                // Inicializar datos de prueba (materiales, movimientos, etc.)
+                FirestoreInitializer.initializeIfEmpty(forceReload = false)
                 
                 // Inicializar roles si no existen
                 FirestoreRoleRepository().initializeDefaultRoles()
