@@ -6,46 +6,47 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
 import java.net.HttpURLConnection
 import java.net.URL
 
+@Serializable
+data class GeminiRequest(
+    val contents: List<Content>
+)
+
+@Serializable
+data class Content(
+    val parts: List<Part>
+)
+
+@Serializable
+data class Part(
+    val text: String
+)
+
+@Serializable
+data class GeminiResponse(
+    val candidates: List<Candidate>? = null,
+    val error: GeminiError? = null
+)
+
+@Serializable
+data class Candidate(
+    val content: Content? = null,
+    val finishReason: String? = null
+)
+
+@Serializable
+data class GeminiError(
+    val code: Int? = null,
+    val message: String? = null,
+    val status: String? = null
+)
+
 object GeminiService {
     private const val API_KEY = "AIzaSyC0ew0UaA5fZ6rhVtIVGQuqHhQItiUFFJk"
-    private const val API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$API_KEY"
-    
-    @Serializable
-    data class GeminiRequest(
-        val contents: List<Content>
-    )
-    
-    @Serializable
-    data class Content(
-        val parts: List<Part>
-    )
-    
-    @Serializable
-    data class Part(
-        val text: String
-    )
-    
-    @Serializable
-    data class GeminiResponse(
-        val candidates: List<Candidate>? = null,
-        val error: GeminiError? = null
-    )
-    
-    @Serializable
-    data class Candidate(
-        val content: Content? = null,
-        val finishReason: String? = null
-    )
-    
-    @Serializable
-    data class GeminiError(
-        val code: Int? = null,
-        val message: String? = null,
-        val status: String? = null
-    )
+    private const val API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$API_KEY"
     
     suspend fun chat(prompt: String, context: String = ""): Result<String> {
         return try {
