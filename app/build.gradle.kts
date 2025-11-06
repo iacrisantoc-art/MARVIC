@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.icons.extended)
     implementation(libs.mpandroidchart)
+    implementation(libs.generativeai)
     
     // Camera
     implementation(libs.camerax)

@@ -6,48 +6,69 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.proyecto.marvic.ai.RealAIEngine
 import com.proyecto.marvic.ai.AIAnalysis
+import com.proyecto.marvic.ai.GeminiAIEngine
+import com.proyecto.marvic.ai.RealAIEngine
 import com.proyecto.marvic.ai.SmartRecommendation
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+data class ChatMessage(val text: String, val sender: String, val timestamp: Long = System.currentTimeMillis())
+
 class RealAIViewModel : ViewModel() {
-    
+
     private val aiEngine = RealAIEngine()
-    
+    private val geminiEngine = GeminiAIEngine()
+
     var isLoading by mutableStateOf(false)
         private set
-    
+
+    var isAnswering by mutableStateOf(false)
+        private set
+
     var errorMessage by mutableStateOf<String?>(null)
         private set
-    
+
     val aiAnalyses = mutableStateListOf<AIAnalysis>()
     val smartRecommendations = mutableStateListOf<SmartRecommendation>()
-    
+
+    val messages = mutableStateListOf<ChatMessage>()
+
     var kpis by mutableStateOf<Map<String, Any>>(emptyMap())
         private set
-    
+
     init {
         loadAIData()
+        messages.add(ChatMessage("¡Hola! Soy tu asistente de IA. ¿Cómo puedo ayudarte a analizar tu inventario hoy?", "ai"))
     }
-    
+
+    fun sendMessage(userText: String) {
+        messages.add(ChatMessage(userText, "user"))
+        isAnswering = true
+        viewModelScope.launch {
+            val aiResponse = geminiEngine.getResponse(userText)
+            messages.add(ChatMessage(aiResponse, "ai"))
+            isAnswering = false
+        }
+    }
+
+
     fun loadAIData() {
         isLoading = true
         errorMessage = null
-        
+
         viewModelScope.launch {
             try {
                 // Cargar análisis de IA en paralelo
                 val analysesJob = launch { loadMaterialAnalyses() }
                 val recommendationsJob = launch { loadSmartRecommendations() }
                 val kpisJob = launch { calculateRealKPIs() }
-                
+
                 // Esperar a que terminen todos
                 analysesJob.join()
                 recommendationsJob.join()
                 kpisJob.join()
-                
+
                 isLoading = false
             } catch (e: Exception) {
                 errorMessage = e.message
@@ -55,25 +76,25 @@ class RealAIViewModel : ViewModel() {
             }
         }
     }
-    
+
     private suspend fun loadMaterialAnalyses() {
         try {
             // Analizar los materiales más importantes
             val materialIds = listOf(
                 "MAT001", "MAT002", "MAT008", "MAT011", "MAT015", "MAT016", "MAT018"
             )
-            
+
             val analyses = materialIds.mapNotNull { materialId ->
                 aiEngine.analyzeDemand(materialId)
             }
-            
+
             aiAnalyses.clear()
             aiAnalyses.addAll(analyses)
         } catch (e: Exception) {
             errorMessage = "Error cargando análisis: ${e.message}"
         }
     }
-    
+
     private suspend fun loadSmartRecommendations() {
         try {
             val recommendations = aiEngine.generateSmartRecommendations()
@@ -83,101 +104,101 @@ class RealAIViewModel : ViewModel() {
             errorMessage = "Error cargando recomendaciones: ${e.message}"
         }
     }
-    
+
     private suspend fun calculateRealKPIs() {
         try {
             val kpiData = mutableMapOf<String, Any>()
-            
+
             // KPI 1: Eficiencia de inventario real
             val totalMaterials = aiAnalyses.size
-            val optimizedMaterials = aiAnalyses.count { 
+            val optimizedMaterials = aiAnalyses.count {
                 it.recommendedAction in listOf("MAINTAIN_CURRENT", "MONITOR_CLOSELY")
             }
             val inventoryEfficiency = if (totalMaterials > 0) {
                 (optimizedMaterials.toDouble() / totalMaterials * 100).roundToInt()
             } else 0
             kpiData["inventoryEfficiency"] = inventoryEfficiency
-            
+
             // KPI 2: Precisión de predicciones
             val avgConfidence = if (aiAnalyses.isNotEmpty()) {
                 aiAnalyses.map { it.confidence }.average().roundToInt()
             } else 0
             kpiData["predictionAccuracy"] = avgConfidence
-            
+
             // KPI 3: Riesgo de stockout
-            val criticalMaterials = aiAnalyses.count { 
+            val criticalMaterials = aiAnalyses.count {
                 it.daysUntilDepletion <= 14 && it.daysUntilDepletion > 0
             }
             val stockoutRisk = if (totalMaterials > 0) {
                 (criticalMaterials.toDouble() / totalMaterials * 100).roundToInt()
             } else 0
             kpiData["stockoutRisk"] = stockoutRisk
-            
+
             // KPI 4: Optimización de costos
             val costOptimization = calculateCostOptimization()
             kpiData["costOptimization"] = costOptimization
-            
+
             // KPI 5: Tendencias de demanda
             val increasingTrend = aiAnalyses.count { it.trendDirection == "increasing" }
             val demandTrend = if (totalMaterials > 0) {
                 (increasingTrend.toDouble() / totalMaterials * 100).roundToInt()
             } else 0
             kpiData["demandTrend"] = demandTrend
-            
+
             kpis = kpiData
         } catch (e: Exception) {
             errorMessage = "Error calculando KPIs: ${e.message}"
         }
     }
-    
+
     private fun calculateCostOptimization(): Int {
         // Calcular optimización de costos basada en análisis
-        val overstockMaterials = aiAnalyses.count { 
+        val overstockMaterials = aiAnalyses.count {
             it.recommendedAction == "REDUCE_STOCK"
         }
-        val understockMaterials = aiAnalyses.count { 
+        val understockMaterials = aiAnalyses.count {
             it.recommendedAction in listOf("REORDER_URGENT", "REORDER_SOON")
         }
-        
+
         // Porcentaje de optimización (menos problemas = más optimización)
         val totalIssues = overstockMaterials + understockMaterials
         val totalMaterials = aiAnalyses.size
-        
+
         return if (totalMaterials > 0) {
             ((totalMaterials - totalIssues).toDouble() / totalMaterials * 100).roundToInt()
         } else 0
     }
-    
+
     fun getMaterialAnalysis(materialId: String): AIAnalysis? {
         return aiAnalyses.find { it.materialId == materialId }
     }
-    
+
     fun getCriticalMaterials(): List<AIAnalysis> {
-        return aiAnalyses.filter { 
+        return aiAnalyses.filter {
             it.daysUntilDepletion <= 14 && it.daysUntilDepletion > 0
         }.sortedBy { it.daysUntilDepletion }
     }
-    
+
     fun getHighConfidencePredictions(): List<AIAnalysis> {
         return aiAnalyses.filter { it.confidence >= 70 }
             .sortedByDescending { it.confidence }
     }
-    
+
     fun getTrendingMaterials(): List<AIAnalysis> {
         return aiAnalyses.filter { it.trendDirection == "increasing" }
             .sortedByDescending { it.predictedDemand }
     }
-    
+
     fun getOptimizationRecommendations(): List<SmartRecommendation> {
-        return smartRecommendations.filter { 
+        return smartRecommendations.filter {
             it.actionType.name in listOf("OPTIMIZE", "RELOCATE")
         }
     }
-    
+
     fun getCriticalRecommendations(): List<SmartRecommendation> {
         return smartRecommendations.filter { it.priority.name == "CRITICAL" }
     }
-    
+
     fun refreshAnalysis(materialId: String) {
         viewModelScope.launch {
             try {
@@ -195,7 +216,7 @@ class RealAIViewModel : ViewModel() {
             }
         }
     }
-    
+
     fun getDashboardSummary(): Map<String, String> {
         return mapOf(
             "totalMaterials" to aiAnalyses.size.toString(),
@@ -208,10 +229,10 @@ class RealAIViewModel : ViewModel() {
             "costOptimization" to "${kpis["costOptimization"]}%"
         )
     }
-    
+
     fun generateMaterialInsight(materialId: String): String {
         val analysis = getMaterialAnalysis(materialId) ?: return "Sin datos disponibles"
-        
+
         return buildString {
             appendLine("📊 Análisis Inteligente de ${analysis.materialName}")
             appendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -225,7 +246,7 @@ class RealAIViewModel : ViewModel() {
             appendLine("💡 Recomendación: ${getActionDescription(analysis.recommendedAction)}")
         }
     }
-    
+
     private fun getTrendEmoji(direction: String): String {
         return when (direction) {
             "increasing" -> "📈"
@@ -233,7 +254,7 @@ class RealAIViewModel : ViewModel() {
             else -> "➡️"
         }
     }
-    
+
     private fun getTrendText(direction: String): String {
         return when (direction) {
             "increasing" -> "En aumento"
@@ -241,7 +262,7 @@ class RealAIViewModel : ViewModel() {
             else -> "Estable"
         }
     }
-    
+
     private fun getActionDescription(action: String): String {
         return when (action) {
             "REORDER_URGENT" -> "🚨 REORDENAR URGENTE - Stock crítico"
@@ -252,7 +273,7 @@ class RealAIViewModel : ViewModel() {
             else -> "❓ Revisar análisis"
         }
     }
-    
+
     // Funciones para calcular métricas reales de IA
     suspend fun calculateEfficiency(): Int {
         return try {
@@ -261,7 +282,7 @@ class RealAIViewModel : ViewModel() {
             0
         }
     }
-    
+
     suspend fun calculatePrecision(): Int {
         return try {
             aiEngine.calculateMLPrecision().roundToInt()
@@ -269,7 +290,7 @@ class RealAIViewModel : ViewModel() {
             0
         }
     }
-    
+
     suspend fun calculateRisk(materials: List<com.proyecto.marvic.data.MaterialItem>): Int {
         return try {
             aiEngine.calculateStockRisk(materials).roundToInt()
