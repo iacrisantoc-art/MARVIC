@@ -1,12 +1,13 @@
 package com.proyecto.marvic.ai
 
 import com.google.ai.client.generativeai.GenerativeModel
+import com.proyecto.marvic.BuildConfig
 
 class GeminiAIEngine {
 
     private val generativeModel = GenerativeModel(
         modelName = "gemini-pro",
-        apiKey = "YOUR_API_KEY"
+        apiKey = BuildConfig.GEMINI_API_KEY
     )
 
     suspend fun getResponse(prompt: String): String {
