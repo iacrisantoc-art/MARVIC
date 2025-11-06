@@ -1,0 +1,12 @@
+# Folders
+.gradle/
+build/
+captures/
+
+# Files
+*.apk
+*.ap_
+*.aab
+*.iml
+local.properties
+.DS_Store
