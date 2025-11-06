@@ -81,7 +81,7 @@ fun DashboardScreen(
     }
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFF121212))) {
             Row(modifier = Modifier.fillMaxWidth().background(Color(0xFF1A1A1A)).padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Grupo Marvic - Dashboard", color = Color.White, fontWeight = FontWeight.SemiBold)
+                Text("Grupo Marvic - Inventario", color = Color.White, fontWeight = FontWeight.SemiBold)
                 Box {
                     IconButton(onClick = { showMenu = true }) {
                         Icon(
@@ -133,7 +133,7 @@ fun DashboardScreen(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Icon(Icons.Default.Analytics, contentDescription = null, tint = MarvicOrange, modifier = Modifier.size(20.dp))
-                                    Text("Analizador de IA", color = Color.White)
+                                    Text("Asistente de IA", color = Color.White)
                                 }
                             },
                             onClick = {

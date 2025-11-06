@@ -598,7 +598,21 @@ object FirestoreInitializer {
             val hour = 60L * 60 * 1000
             
             // Crear 25 movimientos variados (entradas y salidas)
+            // IMPORTANTE: Agregar movimientos RECIENTES (últimas 24 horas) al inicio para que aparezcan en el dashboard
             val movements = listOf(
+                // Movimientos RECIENTES (últimas 24 horas) - Estos aparecerán en el dashboard
+                hashMapOf("materialId" to "MAT001", "delta" to 50, "timestamp" to currentTime - (2L * hour), "userId" to "almacenero@marvic.com"),
+                hashMapOf("materialId" to "MAT002", "delta" to -20, "timestamp" to currentTime - (5L * hour), "userId" to "almacenero@marvic.com"),
+                hashMapOf("materialId" to "MAT003", "delta" to 80, "timestamp" to currentTime - (8L * hour), "userId" to "jefe@marvic.com"),
+                hashMapOf("materialId" to "MAT004", "delta" to -15, "timestamp" to currentTime - (12L * hour), "userId" to "almacenero@marvic.com"),
+                hashMapOf("materialId" to "MAT005", "delta" to 100, "timestamp" to currentTime - (1L * hour), "userId" to "gerente@marvic.com"),
+                hashMapOf("materialId" to "MAT006", "delta" to -30, "timestamp" to currentTime - (18L * hour), "userId" to "almacenero@marvic.com"),
+                hashMapOf("materialId" to "MAT007", "delta" to 60, "timestamp" to currentTime - (3L * hour), "userId" to "jefe@marvic.com"),
+                hashMapOf("materialId" to "MAT008", "delta" to -25, "timestamp" to currentTime - (6L * hour), "userId" to "almacenero@marvic.com"),
+                hashMapOf("materialId" to "MAT009", "delta" to 40, "timestamp" to currentTime - (10L * hour), "userId" to "jefe@marvic.com"),
+                hashMapOf("materialId" to "MAT010", "delta" to -10, "timestamp" to currentTime - (15L * hour), "userId" to "almacenero@marvic.com"),
+                
+                // Movimientos antiguos (históricos)
                 hashMapOf("materialId" to "MAT001", "delta" to 50, "timestamp" to currentTime - (5L * day), "userId" to "almacenero@marvic.com"),
                 hashMapOf("materialId" to "MAT001", "delta" to -20, "timestamp" to currentTime - (3L * day), "userId" to "almacenero@marvic.com"),
                 hashMapOf("materialId" to "MAT002", "delta" to 80, "timestamp" to currentTime - (7L * day), "userId" to "jefe@marvic.com"),
