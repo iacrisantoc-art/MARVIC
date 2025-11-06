@@ -15,9 +15,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -25,24 +35,11 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SwapVert
-import androidx.compose.material.icons.filled.Inventory
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,27 +48,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.proyecto.marvic.data.MaterialItem
+import com.proyecto.marvic.data.UserSession
 import com.proyecto.marvic.ui.theme.MarvicCard
 import com.proyecto.marvic.ui.theme.MarvicGreen
 import com.proyecto.marvic.ui.theme.MarvicOrange
 import com.proyecto.marvic.viewmodel.AuthViewModel
 import com.proyecto.marvic.viewmodel.InventoryViewModel
-import com.proyecto.marvic.data.UserSession
-import com.proyecto.marvic.data.MaterialItem
 
 @Composable
 fun DashboardScreen(
-    onGoToMovement: () -> Unit, 
-    onGoToSearch: () -> Unit, 
-    onGoToReports: () -> Unit, 
+    onGoToMovement: () -> Unit,
+    onGoToSearch: () -> Unit,
+    onGoToReports: () -> Unit,
     onGoToSmartDashboard: () -> Unit,
     onGoToProfile: () -> Unit = {},
     onGoToAnalytics: () -> Unit = {},
-    vm: InventoryViewModel = viewModel(), 
+    vm: InventoryViewModel = viewModel(),
     authVm: AuthViewModel = viewModel()
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    
+
     LaunchedEffect(Unit) {
         vm.refreshTotals()
         vm.observeCritical()
@@ -97,13 +94,13 @@ fun DashboardScreen(
                         modifier = Modifier.background(Color(0xFF1A1A1A))
                     ) {
                         DropdownMenuItem(
-                            text = { 
+                            text = {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Icon(Icons.Default.Dashboard, contentDescription = null, tint = MarvicOrange, modifier = Modifier.size(20.dp))
-                                    Text("Dashboard", color = Color.White)
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MarvicOrange, modifier = Modifier.size(20.dp))
+                                    Text("Asistente de IA", color = Color.White)
                                 }
                             },
                             onClick = {
@@ -112,7 +109,7 @@ fun DashboardScreen(
                             }
                         )
                         DropdownMenuItem(
-                            text = { 
+                            text = {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -126,21 +123,6 @@ fun DashboardScreen(
                                 onGoToProfile()
                             }
                         )
-                        DropdownMenuItem(
-                            text = { 
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(Icons.Default.Analytics, contentDescription = null, tint = MarvicOrange, modifier = Modifier.size(20.dp))
-                                    Text("Analytics", color = Color.White)
-                                }
-                            },
-                            onClick = {
-                                showMenu = false
-                                onGoToAnalytics()
-                            }
-                        )
                     }
                 }
             }
@@ -150,11 +132,11 @@ fun DashboardScreen(
                     Text("STOCK TOTAL:", color = Color(0xFFBDBDBD))
                     Text("${vm.total} unidades", color = Color.White, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(16.dp))
-                    
+
                     // Lista de productos principales
                     Text("PRODUCTOS PRINCIPALES", color = Color(0xFFBDBDBD), fontSize = 14.sp, fontWeight = FontWeight.Medium)
                     Spacer(Modifier.height(8.dp))
-                    
+
                     LazyColumn(
                         modifier = Modifier.height(200.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -184,11 +166,11 @@ fun DashboardScreen(
                 items(vm.allMaterials) { material ->
                     MaterialPriorityCard(material)
                 }
-                
+
                 if (vm.allMaterials.isEmpty()) {
                     item {
                         PriorityCard(
-                            text = "📦 Cargando materiales de Firebase...", 
+                            text = "📦 Cargando materiales de Firebase...",
                             color = Color(0xFF3498DB)
                         )
                     }
@@ -288,15 +270,15 @@ private fun getStockStatus(stock: Int): String {
 // Función para determinar la categoría basada en el nombre
 private fun getCategoryFromName(name: String): String {
     return when {
-        name.contains("cemento", ignoreCase = true) || 
-        name.contains("arena", ignoreCase = true) || 
+        name.contains("cemento", ignoreCase = true) ||
+        name.contains("arena", ignoreCase = true) ||
         name.contains("ladrillo", ignoreCase = true) -> "Construcción"
-        name.contains("varilla", ignoreCase = true) || 
-        name.contains("malla", ignoreCase = true) || 
+        name.contains("varilla", ignoreCase = true) ||
+        name.contains("malla", ignoreCase = true) ||
         name.contains("acero", ignoreCase = true) -> "Acero"
-        name.contains("tubo", ignoreCase = true) || 
+        name.contains("tubo", ignoreCase = true) ||
         name.contains("pvc", ignoreCase = true) -> "Tuberías"
-        name.contains("cable", ignoreCase = true) || 
+        name.contains("cable", ignoreCase = true) ||
         name.contains("eléctrico", ignoreCase = true) -> "Eléctrico"
         name.contains("pintura", ignoreCase = true) -> "Pinturas"
         else -> "General"
@@ -308,7 +290,7 @@ private fun getCategoryFromName(name: String): String {
 private fun MaterialItemCard(material: MaterialItem) {
     val status = getStockStatus(material.cantidad)
     val category = getCategoryFromName(material.nombre)
-    
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -337,7 +319,7 @@ private fun MaterialItemCard(material: MaterialItem) {
                 modifier = Modifier.size(20.dp)
             )
             Spacer(Modifier.width(12.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = material.nombre,
@@ -351,7 +333,7 @@ private fun MaterialItemCard(material: MaterialItem) {
                     fontSize = 12.sp
                 )
             }
-            
+
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = category,
@@ -387,7 +369,7 @@ private fun MaterialPriorityCard(material: MaterialItem) {
         "Bajo" -> Color(0xFFFF9800)
         else -> MarvicGreen
     }
-    
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -415,5 +397,3 @@ private fun MaterialPriorityCard(material: MaterialItem) {
         }
     }
 }
-
-
